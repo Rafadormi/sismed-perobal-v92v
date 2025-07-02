@@ -41,8 +41,6 @@ const MedicineForm = ({ initialData, onSuccess }: MedicineFormProps) => {
     nome: initialData?.nome || '',
     dosagem: initialData?.dosagem || '',
     apresentacao: initialData?.apresentacao || '',
-    // Campo removido: descricao
-    descricao: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,7 +75,6 @@ const MedicineForm = ({ initialData, onSuccess }: MedicineFormProps) => {
           nome: '',
           dosagem: '',
           apresentacao: '',
-          descricao: '',
         });
       }
       
