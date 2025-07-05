@@ -21,14 +21,6 @@ const PatientForm = ({ initialData, onSuccess }: PatientFormProps) => {
     nome: initialData?.nome || '',
     cpf: initialData?.cpf || '',
     dataNascimento: initialData?.dataNascimento || '',
-    // Campos removidos: cartaoSus, codCid, nomeMae, endereco, contato, bairro, observacao
-    cartaoSus: '',
-    codCid: '',
-    nomeMae: '',
-    endereco: '',
-    contato: '',
-    bairro: '',
-    observacao: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,13 +65,6 @@ const PatientForm = ({ initialData, onSuccess }: PatientFormProps) => {
           nome: '',
           cpf: '',
           dataNascimento: '',
-          cartaoSus: '',
-          codCid: '',
-          nomeMae: '',
-          endereco: '',
-          contato: '',
-          bairro: '',
-          observacao: '',
         });
       }
       

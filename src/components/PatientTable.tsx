@@ -82,15 +82,13 @@ const PatientTable = ({
               <TableHead>CPF</TableHead>
               <TableHead>Nome</TableHead>
               <TableHead className="hidden md:table-cell">Dt Nascimento</TableHead>
-              <TableHead className="hidden md:table-cell">Cartão SUS</TableHead>
-              <TableHead className="hidden lg:table-cell">Contato</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredPatients.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
+                <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
                   Nenhum paciente encontrado
                 </TableCell>
               </TableRow>
@@ -100,8 +98,6 @@ const PatientTable = ({
                   <TableCell>{patient.cpf}</TableCell>
                   <TableCell className="font-medium">{patient.nome}</TableCell>
                   <TableCell className="hidden md:table-cell">{formatDate(patient.dataNascimento)}</TableCell>
-                  <TableCell className="hidden md:table-cell">{patient.cartaoSus}</TableCell>
-                  <TableCell className="hidden lg:table-cell">{patient.contato}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

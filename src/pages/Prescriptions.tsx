@@ -268,9 +268,6 @@ const Prescriptions = () => {
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                             Data Nasc.
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                            Contato
-                          </th>
                           <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Ação
                           </th>
@@ -287,9 +284,6 @@ const Prescriptions = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
                               {formatDate(patient.dataNascimento)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
-                              {patient.contato}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                               <Button
@@ -439,7 +433,6 @@ const Prescriptions = () => {
                         <div className="space-y-1 text-sm">
                           <p><span className="font-medium">Nome:</span> {selectedPatient.nome}</p>
                           <p><span className="font-medium">CPF:</span> {selectedPatient.cpf}</p>
-                          <p><span className="font-medium">Cartão SUS:</span> {selectedPatient.cartaoSus}</p>
                           <p><span className="font-medium">Data Nasc.:</span> {formatDate(selectedPatient.dataNascimento)}</p>
                         </div>
                       </div>
@@ -452,9 +445,6 @@ const Prescriptions = () => {
                         <div className="space-y-1 text-sm">
                           <p>
                             <span className="font-medium">Data:</span> {formatDate(selectedPrescription.data)}
-                          </p>
-                          <p>
-                            <span className="font-medium">CID:</span> {selectedPatient.codCid || "Não informado"}
                           </p>
                         </div>
                       </div>
@@ -539,15 +529,7 @@ const Prescriptions = () => {
                             <strong>CPF:</strong> {selectedPatient.cpf}
                           </td>
                           <td className="align-top py-1">
-                            <strong>Cartão SUS:</strong> {selectedPatient.cartaoSus}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="align-top py-1">
                             <strong>Data Nasc.:</strong> {formatDate(selectedPatient.dataNascimento)}
-                          </td>
-                          <td className="align-top py-1">
-                            <strong>CID:</strong> {selectedPatient.codCid || "N/A"}
                           </td>
                         </tr>
                       </tbody>

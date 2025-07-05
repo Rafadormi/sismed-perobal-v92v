@@ -99,14 +99,13 @@ const Medicines = () => {
                     <TableHead>Nome</TableHead>
                     <TableHead>Dosagem</TableHead>
                     <TableHead className="hidden md:table-cell">Apresentação</TableHead>
-                    <TableHead className="hidden md:table-cell">Descrição</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredMedicines.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
+                      <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
                         Nenhum medicamento encontrado
                       </TableCell>
                     </TableRow>
@@ -116,11 +115,6 @@ const Medicines = () => {
                         <TableCell className="font-medium">{medicine.nome}</TableCell>
                         <TableCell>{medicine.dosagem}</TableCell>
                         <TableCell className="hidden md:table-cell">{medicine.apresentacao}</TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {medicine.descricao.length > 50 
-                            ? medicine.descricao.substring(0, 50) + "..." 
-                            : medicine.descricao}
-                        </TableCell>
                         <TableCell className="text-right">
                           <Button
                             variant="ghost"
