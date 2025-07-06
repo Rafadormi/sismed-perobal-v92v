@@ -1,15 +1,10 @@
 
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { 
-  addPrescription, 
-  getPatientById, 
-  getMedicines, 
-  getMedicineById 
-} from '@/utils/storage';
+import { useMedicines } from '@/hooks/useMedicines';
+import { usePrescriptions } from '@/hooks/usePrescriptions';
 import { 
   Medicine, 
-  Prescription, 
   PrescriptionMedicine,
   PrescriptionDateConfig
 } from '@/types';
@@ -30,6 +25,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Search, Plus, Trash2 } from "lucide-react";
 import PrescriptionDateSelector from './PrescriptionDateSelector';
+import { getPatientById } from '@/utils/storage';
 
 interface PrescriptionFormProps {
   patientId?: number;
@@ -38,46 +34,26 @@ interface PrescriptionFormProps {
 
 const PrescriptionForm = ({ patientId, onSuccess }: PrescriptionFormProps) => {
   const { toast } = useToast();
+  const { medicines, isLoading: isMedicinesLoading } = useMedicines();
+  const { generateMultiplePrescriptions } = usePrescriptions();
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [allMedicines, setAllMedicines] = useState<Medicine[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMedicine, setSelectedMedicine] = useState<number | null>(null);
   const [posologia, setPosologia] = useState("");
+  const [observacoes, setObservacoes] = useState("");
+  const [medicamentosAdicionados, setMedicamentosAdicionados] = useState<PrescriptionMedicine[]>([]);
   const [prescriptionDates, setPrescriptionDates] = useState<PrescriptionDateConfig[]>([
     { enabled: true, date: new Date().toISOString().split('T')[0] }
   ]);
-  
-  const [formData, setFormData] = useState<Omit<Prescription, 'id'>>({
-    pacienteId: patientId || 0,
-    data: new Date().toISOString().split('T')[0],
-    medicamentos: [],
-    observacoes: '',
-  });
-
-  // Carregar medicamentos
-  useEffect(() => {
-    setAllMedicines(getMedicines());
-    
-    if (patientId) {
-      setFormData(prev => ({
-        ...prev,
-        pacienteId: patientId
-      }));
-    }
-  }, [patientId]);
 
   // Obter nome do paciente
   const patientName = patientId ? getPatientById(patientId)?.nome || "" : "";
 
   // Filtrar medicamentos com a pesquisa
-  const filteredMedicines = allMedicines.filter(med => 
+  const filteredMedicines = medicines.filter(med => 
     med.nome.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
 
   const addMedicineToList = () => {
     if (!selectedMedicine || !posologia) {
@@ -94,10 +70,7 @@ const PrescriptionForm = ({ patientId, onSuccess }: PrescriptionFormProps) => {
       posologia: posologia
     };
 
-    setFormData({
-      ...formData,
-      medicamentos: [...formData.medicamentos, newMedication]
-    });
+    setMedicamentosAdicionados([...medicamentosAdicionados, newMedication]);
 
     // Limpar os campos
     setSelectedMedicine(null);
@@ -105,76 +78,56 @@ const PrescriptionForm = ({ patientId, onSuccess }: PrescriptionFormProps) => {
   };
 
   const removeMedicine = (index: number) => {
-    const updatedMeds = [...formData.medicamentos];
+    const updatedMeds = [...medicamentosAdicionados];
     updatedMeds.splice(index, 1);
-    setFormData({ ...formData, medicamentos: updatedMeds });
+    setMedicamentosAdicionados(updatedMeds);
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitting(true);
     
-    if (formData.medicamentos.length === 0) {
+    if (!patientId) {
+      toast({
+        title: "Erro",
+        description: "Paciente não selecionado",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (medicamentosAdicionados.length === 0) {
       toast({
         title: "Lista vazia",
         description: "Adicione pelo menos um medicamento à receita",
         variant: "destructive"
       });
-      setIsSubmitting(false);
       return;
     }
 
+    const enabledDates = prescriptionDates.filter(d => d.enabled);
+    
+    if (enabledDates.length === 0) {
+      toast({
+        title: "Nenhuma data selecionada",
+        description: "Selecione pelo menos uma data para gerar a receita",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    
     try {
-      // Verificar se estamos gerando múltiplas receitas
-      const enabledDates = prescriptionDates.filter(d => d.enabled);
-      
-      if (enabledDates.length > 1) {
-        // Gerar múltiplas receitas
-        enabledDates.forEach((dateConfig) => {
-          const prescriptionData = {
-            ...formData,
-            data: dateConfig.date
-          };
-          
-          addPrescription(prescriptionData);
-        });
-        
-        toast({
-          title: `${enabledDates.length} receitas geradas`,
-          description: `Foram geradas ${enabledDates.length} receitas com sucesso`,
-        });
-      } else if (enabledDates.length === 1) {
-        // Gerar uma única receita com a data selecionada
-        const prescriptionData = {
-          ...formData,
-          data: enabledDates[0].date
-        };
-        
-        addPrescription(prescriptionData);
-        
-        toast({
-          title: "Receita gerada",
-          description: "A receita foi gerada com sucesso",
-        });
-      } else {
-        toast({
-          title: "Nenhuma data selecionada",
-          description: "Selecione pelo menos uma data para gerar a receita",
-          variant: "destructive"
-        });
-        setIsSubmitting(false);
-        return;
-      }
-      
-      // Limpar o formulário
-      setFormData({
-        pacienteId: patientId || 0,
-        data: new Date().toISOString().split('T')[0],
-        medicamentos: [],
-        observacoes: '',
+      await generateMultiplePrescriptions({
+        pacienteId: patientId,
+        medicamentos: medicamentosAdicionados,
+        observacoes: observacoes,
+        datas: prescriptionDates
       });
       
-      // Resetar datas
+      // Limpar o formulário
+      setMedicamentosAdicionados([]);
+      setObservacoes('');
       setPrescriptionDates([{ 
         enabled: true, 
         date: new Date().toISOString().split('T')[0] 
@@ -182,11 +135,7 @@ const PrescriptionForm = ({ patientId, onSuccess }: PrescriptionFormProps) => {
       
       if (onSuccess) onSuccess();
     } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao gerar a receita",
-        variant: "destructive"
-      });
+      console.error('Erro ao gerar receitas:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -194,7 +143,7 @@ const PrescriptionForm = ({ patientId, onSuccess }: PrescriptionFormProps) => {
 
   // Função para obter o medicamento pelo ID
   const getMedicineInfo = (id: number): Medicine | undefined => {
-    return getMedicineById(id);
+    return medicines.find(med => med.id === id);
   };
 
   return (
@@ -218,7 +167,7 @@ const PrescriptionForm = ({ patientId, onSuccess }: PrescriptionFormProps) => {
           <PrescriptionDateSelector 
             dates={prescriptionDates}
             onChange={setPrescriptionDates}
-            initialDate={formData.data}
+            initialDate={new Date().toISOString().split('T')[0]}
           />
         </div>
 
@@ -249,7 +198,13 @@ const PrescriptionForm = ({ patientId, onSuccess }: PrescriptionFormProps) => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredMedicines.length === 0 ? (
+                  {isMedicinesLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
+                        Carregando medicamentos...
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredMedicines.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
                         Nenhum medicamento encontrado
@@ -301,7 +256,7 @@ const PrescriptionForm = ({ patientId, onSuccess }: PrescriptionFormProps) => {
           </TabsContent>
           
           <TabsContent value="list">
-            {formData.medicamentos.length === 0 ? (
+            {medicamentosAdicionados.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 Nenhum medicamento adicionado à receita
               </div>
@@ -316,7 +271,7 @@ const PrescriptionForm = ({ patientId, onSuccess }: PrescriptionFormProps) => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {formData.medicamentos.map((med, index) => {
+                    {medicamentosAdicionados.map((med, index) => {
                       const medicine = getMedicineInfo(med.medicamentoId);
                       return (
                         <TableRow key={index}>
@@ -350,7 +305,7 @@ const PrescriptionForm = ({ patientId, onSuccess }: PrescriptionFormProps) => {
             
             <div className="mt-4">
               <Badge variant="secondary" className="mr-2">
-                Total: {formData.medicamentos.length} medicamentos
+                Total: {medicamentosAdicionados.length} medicamentos
               </Badge>
             </div>
           </TabsContent>
@@ -362,8 +317,8 @@ const PrescriptionForm = ({ patientId, onSuccess }: PrescriptionFormProps) => {
             id="observacoes"
             name="observacoes"
             placeholder="Observações adicionais para a receita"
-            value={formData.observacoes}
-            onChange={handleChange}
+            value={observacoes}
+            onChange={(e) => setObservacoes(e.target.value)}
             rows={3}
           />
         </div>
@@ -372,7 +327,7 @@ const PrescriptionForm = ({ patientId, onSuccess }: PrescriptionFormProps) => {
           <Button
             type="submit"
             className="bg-health-600 hover:bg-health-700"
-            disabled={isSubmitting || !patientId || formData.medicamentos.length === 0}
+            disabled={isSubmitting || !patientId || medicamentosAdicionados.length === 0}
           >
             {isSubmitting ? 'Gerando...' : prescriptionDates.filter(d => d.enabled).length > 1 
               ? `Gerar ${prescriptionDates.filter(d => d.enabled).length} Receitas` 

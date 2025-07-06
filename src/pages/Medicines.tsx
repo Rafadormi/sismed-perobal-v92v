@@ -1,30 +1,27 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import MedicineForm from '@/components/MedicineForm';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
 import { Medicine } from '@/types';
-import { getMedicines, deleteMedicine } from '@/utils/storage';
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import { useMedicines } from '@/hooks/useMedicines';
+import { Plus, Search, Edit, Trash2, Pill } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useToast } from '@/hooks/use-toast';
 
 const Medicines = () => {
-  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('list');
-  const [medicines, setMedicines] = useState<Medicine[]>([]);
   const [editingMedicine, setEditingMedicine] = useState<Medicine | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState("");
   
-  useEffect(() => {
-    loadMedicines();
-  }, []);
-  
-  const loadMedicines = () => {
-    setMedicines(getMedicines());
-  };
+  const { 
+    medicines, 
+    isLoading, 
+    deleteMedicine, 
+    isDeletingMedicine 
+  } = useMedicines();
   
   const handleEdit = (medicine: Medicine) => {
     setEditingMedicine(medicine);
@@ -34,16 +31,10 @@ const Medicines = () => {
   const handleDelete = (id: number) => {
     if (confirm("Tem certeza que deseja excluir este medicamento?")) {
       deleteMedicine(id);
-      toast({
-        title: "Medicamento excluído",
-        description: "O medicamento foi excluído com sucesso",
-      });
-      loadMedicines();
     }
   };
   
   const handleFormSuccess = () => {
-    loadMedicines();
     setActiveTab('list');
     setEditingMedicine(undefined);
   };
@@ -58,9 +49,12 @@ const Medicines = () => {
       
       <div className="container mx-auto py-8 px-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-health-700">Medicamentos</h1>
-            <p className="text-gray-600">Gerencie o cadastro de medicamentos</p>
+          <div className="flex items-center">
+            <Pill className="mr-3 h-8 w-8 text-health-700" />
+            <div>
+              <h1 className="text-3xl font-bold text-health-700">Medicamentos</h1>
+              <p className="text-gray-600">Gerencie o cadastro de medicamentos</p>
+            </div>
           </div>
           
           {activeTab === 'list' && (
@@ -72,10 +66,20 @@ const Medicines = () => {
             </Button>
           )}
         </div>
+
+        {isLoading && (
+          <Card className="mb-4">
+            <CardContent className="p-6 text-center">
+              <div className="text-muted-foreground">Carregando medicamentos...</div>
+            </CardContent>
+          </Card>
+        )}
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="list">Lista de Medicamentos</TabsTrigger>
+            <TabsTrigger value="list">
+              Lista de Medicamentos ({medicines.length})
+            </TabsTrigger>
             <TabsTrigger value="form">
               {editingMedicine ? 'Editar Medicamento' : 'Novo Medicamento'}
             </TabsTrigger>
@@ -92,53 +96,58 @@ const Medicines = () => {
               />
             </div>
             
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Dosagem</TableHead>
-                    <TableHead className="hidden md:table-cell">Apresentação</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredMedicines.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
-                        Nenhum medicamento encontrado
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredMedicines.map((medicine) => (
-                      <TableRow key={medicine.id}>
-                        <TableCell className="font-medium">{medicine.nome}</TableCell>
-                        <TableCell>{medicine.dosagem}</TableCell>
-                        <TableCell className="hidden md:table-cell">{medicine.apresentacao}</TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEdit(medicine)}
-                            className="text-blue-500 hover:text-blue-700"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(medicine.id)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
+            <Card>
+              <CardContent className="p-0">
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nome</TableHead>
+                        <TableHead>Dosagem</TableHead>
+                        <TableHead className="hidden md:table-cell">Apresentação</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredMedicines.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                            {isLoading ? "Carregando..." : "Nenhum medicamento encontrado"}
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        filteredMedicines.map((medicine) => (
+                          <TableRow key={medicine.id}>
+                            <TableCell className="font-medium">{medicine.nome}</TableCell>
+                            <TableCell>{medicine.dosagem}</TableCell>
+                            <TableCell className="hidden md:table-cell">{medicine.apresentacao}</TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEdit(medicine)}
+                                className="text-blue-500 hover:text-blue-700"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDelete(medicine.id)}
+                                className="text-red-500 hover:text-red-700"
+                                disabled={isDeletingMedicine}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
           
           <TabsContent value="form" className="mt-4">
