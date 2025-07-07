@@ -90,7 +90,7 @@ const Patients = () => {
               patients={patients}
               onEdit={handleEdit}
               onPrescription={handlePrescription}
-              onPatientDeleted={handleDelete}
+              onPatientDeleted={(id) => handleDelete(id)}
               isDeleting={isDeletingPatient}
             />
           </TabsContent>

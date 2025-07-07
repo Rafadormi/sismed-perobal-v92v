@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { User, Calendar, Printer, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
-import { getMedicineById } from '@/utils/storage';
+import { getMedicineByIdSync } from '@/utils/storage';
 
 interface PrescriptionViewerProps {
   prescription: Prescription;
@@ -21,7 +21,7 @@ const PrescriptionViewer = ({ prescription, patient, onBack, onPrint }: Prescrip
   };
 
   const getMedicine = (id: number): Medicine | undefined => {
-    return getMedicineById(id);
+    return getMedicineByIdSync(id);
   };
 
   return (

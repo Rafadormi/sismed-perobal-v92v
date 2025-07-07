@@ -158,7 +158,7 @@ export const getPrescriptionById = async (id: number): Promise<Prescription | un
   return prescriptions.find(p => p.id === id);
 };
 
-// Synchronous versions for components that need immediate access
+// Versões síncronas para componentes que precisam de acesso imediato
 export const getPatientByIdSync = (id: number): Patient | undefined => {
   const data = localStorage.getItem(KEYS.PATIENTS);
   const patients = data ? JSON.parse(data) : [];
@@ -169,4 +169,16 @@ export const getPrescriptionByIdSync = (id: number): Prescription | undefined =>
   const data = localStorage.getItem(KEYS.PRESCRIPTIONS);
   const prescriptions = data ? JSON.parse(data) : [];
   return prescriptions.find((p: Prescription) => p.id === id);
+};
+
+export const getMedicineByIdSync = (id: number): Medicine | undefined => {
+  const data = localStorage.getItem(KEYS.MEDICINES);
+  const medicines = data ? JSON.parse(data) : [];
+  return medicines.find((m: Medicine) => m.id === id);
+};
+
+// Versão síncrona para obter todos os medicamentos
+export const getMedicinesSync = (): Medicine[] => {
+  const data = localStorage.getItem(KEYS.MEDICINES);
+  return data ? JSON.parse(data) : [];
 };
