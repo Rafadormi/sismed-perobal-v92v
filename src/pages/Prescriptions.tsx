@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Patient, Prescription } from '@/types';
 import { usePatients } from '@/hooks/usePatients';
 import { usePrescriptions } from '@/hooks/usePrescriptions';
-import { getPatientById, getPrescriptionById } from '@/utils/storage';
+import { getPatientByIdSync, getPrescriptionByIdSync } from '@/utils/storage';
 import { FileText, Search } from 'lucide-react';
 
 const Prescriptions = () => {
@@ -33,11 +33,11 @@ const Prescriptions = () => {
   useEffect(() => {
     if (patientIdParam) {
       const patientId = parseInt(patientIdParam);
-      const patient = getPatientById(patientId);
+      const patient = getPatientByIdSync(patientId);
       
       if (patient) {
         setSelectedPatient(patient);
-        setActiveTab('new');
+        setActiveTab('list');
       }
     }
   }, [patientIdParam]);
@@ -104,7 +104,11 @@ const Prescriptions = () => {
           {selectedPatient && activeTab === 'list' && (
             <div className="mt-4 md:mt-0 flex flex-col sm:flex-row gap-2">
               <Button
-                onClick={handleBackToSearch}
+                onClick={() => {
+                  setSelectedPatient(null);
+                  setSelectedPrescription(null);
+                  setActiveTab('search');
+                }}
                 variant="outline"
               >
                 <Search className="mr-1 h-4 w-4" /> Buscar outro paciente
@@ -125,7 +129,9 @@ const Prescriptions = () => {
           value={activeTab} 
           onValueChange={(value) => {
             if (value === 'search' && activeTab !== 'search') {
-              handleBackToSearch();
+              setSelectedPatient(null);
+              setSelectedPrescription(null);
+              setActiveTab('search');
             } else {
               setActiveTab(value);
             }
@@ -150,7 +156,10 @@ const Prescriptions = () => {
           <TabsContent value="search" className="mt-4">
             <PatientSearchCard
               patients={patients}
-              onSelectPatient={handleSelectPatient}
+              onSelectPatient={(patient) => {
+                setSelectedPatient(patient);
+                setActiveTab('list');
+              }}
               isLoading={isPatientsLoading}
             />
           </TabsContent>
@@ -160,7 +169,7 @@ const Prescriptions = () => {
               <PrescriptionListCard
                 patient={selectedPatient}
                 prescriptions={prescriptions}
-                onNewPrescription={handleNewPrescription}
+                onNewPrescription={() => setActiveTab('new')}
                 onViewPrescription={handleViewPrescription}
                 onDeletePrescription={handleDeletePrescription}
                 isLoading={isPrescriptionsLoading}
@@ -173,7 +182,7 @@ const Prescriptions = () => {
               <>
                 <PrescriptionForm 
                   patientId={selectedPatient.id}
-                  onSuccess={handlePrescriptionCreated}
+                  onSuccess={() => setActiveTab('list')}
                 />
                 
                 <div className="mt-4 flex justify-start">
@@ -193,8 +202,11 @@ const Prescriptions = () => {
               <PrescriptionViewer
                 prescription={selectedPrescription}
                 patient={selectedPatient}
-                onBack={handleBackToList}
-                onPrint={handlePrint}
+                onBack={() => {
+                  setSelectedPrescription(null);
+                  setActiveTab('list');
+                }}
+                onPrint={() => window.print()}
               />
             )}
           </TabsContent>
