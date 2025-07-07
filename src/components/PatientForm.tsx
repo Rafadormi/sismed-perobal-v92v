@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { addPatient, updatePatient } from '@/utils/storage';
@@ -11,9 +10,10 @@ import { Label } from '@/components/ui/label';
 interface PatientFormProps {
   initialData?: Patient;
   onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-const PatientForm = ({ initialData, onSuccess }: PatientFormProps) => {
+const PatientForm = ({ initialData, onSuccess, onCancel }: PatientFormProps) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -122,7 +122,16 @@ const PatientForm = ({ initialData, onSuccess }: PatientFormProps) => {
           />
         </div>
         
-        <div className="flex justify-end pt-4">
+        <div className="flex justify-end gap-2 pt-4">
+          {onCancel && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+            >
+              Cancelar
+            </Button>
+          )}
           <Button
             type="submit"
             className="bg-health-600 hover:bg-health-700"

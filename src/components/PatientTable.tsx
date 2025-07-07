@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Patient } from "@/types";
 import {
@@ -19,24 +18,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { deletePatient } from "@/utils/storage";
-import { useToast } from "@/hooks/use-toast";
 import { MoreHorizontal, File, Edit, Trash2, Search } from "lucide-react";
 
 interface PatientTableProps {
   patients: Patient[];
   onEdit: (patient: Patient) => void;
+  onDelete: (id: number) => void;
   onPrescription?: (patient: Patient) => void;
-  onPatientDeleted?: () => void;
 }
 
 const PatientTable = ({ 
   patients, 
   onEdit, 
-  onPrescription, 
-  onPatientDeleted 
+  onDelete,
+  onPrescription
 }: PatientTableProps) => {
-  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   
   const filteredPatients = patients.filter(
@@ -44,17 +40,6 @@ const PatientTable = ({
       patient.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.cpf.includes(searchTerm)
   );
-
-  const handleDelete = (id: number) => {
-    if (confirm("Tem certeza que deseja excluir este paciente?")) {
-      deletePatient(id);
-      toast({
-        title: "Paciente excluído",
-        description: "O paciente foi excluído com sucesso",
-      });
-      if (onPatientDeleted) onPatientDeleted();
-    }
-  };
 
   // Função para formatar a data
   const formatDate = (dateStr: string) => {
@@ -120,7 +105,7 @@ const PatientTable = ({
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuItem 
-                          onClick={() => handleDelete(patient.id)}
+                          onClick={() => onDelete(patient.id)}
                           className="text-red-600 focus:text-red-600"
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
