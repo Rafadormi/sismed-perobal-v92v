@@ -1,808 +1,363 @@
 
 # PLANO ESTRATÉGICO DE CORREÇÃO E MELHORIA CONTÍNUA
-# SisMed Perobal v9.0 - Sistema de Receitas Médicas Offline
-# Versão: 1.0 | Data: 06/07/2025
-# Responsável Técnico: Análise Completa do Projeto
+# SisMed Perobal v9.0 - Sistema de Receitas Médicas 100% Offline
+# Versão: 2.0 | Data: 07/07/2025
+# Arquitetura: 100% Client-Side (Navegador)
 
 ================================================================================
-SUMÁRIO EXECUTIVO
+SUMÁRIO EXECUTIVO - ATUALIZADO
 ================================================================================
 
-O projeto SisMed Perobal v9.0 apresenta uma arquitetura híbrida interessante, mas com inconsistências críticas que impedem sua evolução sustentável. Esta análise identificou 47 pontos de melhoria distribuídos em 8 categorias principais.
+O projeto SisMed Perobal v9.0 será uma aplicação **100% offline** que roda diretamente no navegador Windows (Chrome/Edge), sem necessidade de instalação ou empacotamento como executável (.exe).
 
-PRIORIDADE CRÍTICA: Resolver dualidade arquitetural (localStorage vs Backend Flask)
-PRIORIDADE ALTA: Implementar geração de PDF robusta e sistema de múltiplas receitas
-PRIORIDADE MÉDIA: Refatorar componentes longos e melhorar tipagem TypeScript
-
-================================================================================
-1. ANÁLISE CRÍTICA DO ESTADO ATUAL
-================================================================================
-
-1.1 PROBLEMAS IDENTIFICADOS (Classificação por Severidade)
-
-🔴 CRÍTICOS (Impedem funcionamento completo):
-- Dualidade arquitetural: localStorage + Backend Flask simultaneamente
-- Inconsistência nos tipos: Patient, Medicine com campos conflitantes
-- Sistema de geração de PDF incompleto/não funcional
-- Falta de sincronização entre frontend e backend
-
-🟡 ALTOS (Impactam qualidade e manutenibilidade):
-- Componentes excessivamente longos (PrescriptionForm: 388 linhas, Prescriptions: 584 linhas)
-- Lógica de múltiplas receitas complexa e pouco testável
-- Mistura de responsabilidades nos componentes
-- Falta de validação de dados robusta
-
-🟢 MÉDIOS (Melhorias de qualidade):
-- Inconsistências de nomenclatura (português/inglês)
-- Código duplicado em várias partes
-- Falta de tratamento de erros padronizado
-- Ausência de testes automatizados
-
-1.2 PONTOS POSITIVOS IDENTIFICADOS:
-✅ Uso correto do shadcn/ui e Tailwind CSS
-✅ Estrutura de tipos TypeScript bem definida
-✅ Interface limpa e intuitiva
-✅ Separação clara entre componentes de UI
-✅ Uso adequado do React Router
+DECISÃO ARQUITETURAL FINAL: 100% Client-Side no Navegador
+- Frontend: React + Vite + TypeScript
+- Banco: SQLite via sql.js (navegador)
+- PDF: jsPDF + template oficial
+- Distribuição: Build estático + servidor local
 
 ================================================================================
-2. ARQUITETURA ESTRATÉGICA RECOMENDADA
+1. ARQUITETURA DEFINITIVA (100% OFFLINE NO NAVEGADOR)
 ================================================================================
 
-2.1 DECISÃO ARQUITETURAL: VERSÃO 100% OFFLINE
+1.1 STACK TECNOLÓGICA CONFIRMADA:
 
 FRONTEND: React.js + Vite + TypeScript
-BACKEND: Eliminado (substituído por lógica local)
-ARMAZENAMENTO: SQLite via sql.js (browser) + localStorage (cache)
-GERAÇÃO PDF: PDFLib ou jsPDF (cliente-side)
+BANCO DE DADOS: SQLite via sql.js (client-side)
+ARMAZENAMENTO: localStorage (cache leve)
+GERAÇÃO PDF: jsPDF + template oficial
+SERVIDOR: npx serve dist (local, sem dependências externas)
 
-2.2 ESTRUTURA DE DIRETÓRIOS DEFINITIVA:
+1.2 ELIMINAÇÕES CONFIRMADAS:
+❌ Electron (descartado)
+❌ Backend Flask (descartado)
+❌ Executável .exe (descartado)
+❌ Instaladores NSIS (descartado)
+❌ Chamadas HTTP/API (descartado)
 
-```
-sismed-perobal-v9-offline/
-├── public/
-│   ├── assets/
-│   │   ├── logo-perobal.png
-│   │   └── template-receita.png
-│   └── sismed.db (SQLite inicial)
-├── src/
-│   ├── components/
-│   │   ├── ui/ (shadcn components)
-│   │   ├── forms/
-│   │   │   ├── PatientForm.tsx
-│   │   │   ├── MedicineForm.tsx
-│   │   │   └── PrescriptionForm.tsx
-│   │   ├── tables/
-│   │   │   ├── PatientTable.tsx
-│   │   │   ├── MedicineTable.tsx
-│   │   │   └── PrescriptionTable.tsx
-│   │   ├── layout/
-│   │   │   ├── Navbar.tsx
-│   │   │   └── PageLayout.tsx
-│   │   └── common/
-│   │       ├── LoadingSpinner.tsx
-│   │       ├── ErrorBoundary.tsx
-│   │       └── ConfirmDialog.tsx
-│   ├── hooks/
-│   │   ├── useDatabase.ts
-│   │   ├── usePDF.ts
-│   │   ├── useLocalStorage.ts
-│   │   └── useValidation.ts
-│   ├── services/
-│   │   ├── database.ts (SQLite operations)
-│   │   ├── pdfGenerator.ts
-│   │   ├── dataSync.ts
-│   │   └── validation.ts
-│   ├── utils/
-│   │   ├── constants.ts
-│   │   ├── formatters.ts
-│   │   ├── helpers.ts
-│   │   └── types.ts
-│   ├── pages/
-│   │   ├── Dashboard.tsx
-│   │   ├── Patients.tsx
-│   │   ├── Medicines.tsx
-│   │   ├── Prescriptions.tsx
-│   │   └── Settings.tsx
-│   └── App.tsx
-├── scripts/
-│   ├── setup-db.js
-│   └── seed-data.js
-├── SisMed-Perobal.exe (Executável final - Electron)
-└── package.json
-```
+1.3 FUNCIONAMENTO:
+✅ Build: npm run build
+✅ Execução: npx serve dist
+✅ Acesso: http://localhost:3000
+✅ Offline: 100% funcional sem internet
+✅ Distribuição: Pasta dist + script .bat
 
 ================================================================================
-3. MODELO DE DADOS OTIMIZADO
+2. MODELO DE DADOS SIMPLIFICADO (SQLite CLIENT-SIDE)
 ================================================================================
 
-3.1 TABELAS DO BANCO SQLITE:
+2.1 ESTRUTURA DO BANCO (sql.js):
 
 ```sql
--- Tabela de Pacientes (Simplificada)
+-- Pacientes
 CREATE TABLE patients (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT NOT NULL,
-    cpf TEXT UNIQUE,
+    cpf TEXT,
     data_nascimento DATE,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela de Medicamentos (36 especializados)
+-- Medicamentos Oficiais (36 itens)
 CREATE TABLE medicines (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     denominacao_generica TEXT NOT NULL,
     concentracao TEXT NOT NULL,
     apresentacao TEXT NOT NULL,
-    ativo BOOLEAN DEFAULT 1,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    ativo BOOLEAN DEFAULT 1
 );
 
--- Tabela de Receitas
+-- Receitas
 CREATE TABLE prescriptions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     patient_id INTEGER NOT NULL,
     data_receita DATE NOT NULL,
     observacoes TEXT,
-    status TEXT DEFAULT 'ativa', -- ativa, cancelada, vencida
+    status TEXT DEFAULT 'ativa',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES patients(id)
 );
 
--- Tabela de Medicamentos da Receita
+-- Medicamentos da Receita
 CREATE TABLE prescription_medicines (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     prescription_id INTEGER NOT NULL,
     medicine_id INTEGER NOT NULL,
     posologia TEXT NOT NULL,
-    quantidade INTEGER,
-    observacoes_medicamento TEXT,
     FOREIGN KEY (prescription_id) REFERENCES prescriptions(id),
     FOREIGN KEY (medicine_id) REFERENCES medicines(id)
 );
-
--- Tabela de Configurações do Sistema
-CREATE TABLE system_config (
-    key TEXT PRIMARY KEY,
-    value TEXT NOT NULL,
-    description TEXT
-);
-```
-
-3.2 DADOS INICIAIS (Seed):
-
-```javascript
-// 36 Medicamentos de Saúde Mental (Conforme fornecido)
-const MEDICAMENTOS_OFICIAIS = [
-    {denominacao: "AMITRIPTILINA", concentracao: "25MG", apresentacao: "COMPRIMIDO"},
-    {denominacao: "ÁCIDO VALPROICO", concentracao: "250MG", apresentacao: "COMPRIMIDO"},
-    {denominacao: "ÁCIDO VALPROICO", concentracao: "500MG", apresentacao: "COMPRIMIDO"},
-    // ... (todos os 36 medicamentos)
-];
-
-// Posologias Padrão
-const POSOLOGIAS_PADRAO = [
-    "1 comprimido pela manhã",
-    "1 comprimido à noite",
-    "1 comprimido a cada 8 horas",
-    "1 comprimido a cada 12 horas",
-    "2 comprimidos ao dia",
-    "Conforme orientação médica"
-];
 ```
 
 ================================================================================
-4. FUNCIONALIDADES PRIORITÁRIAS
+3. TEMPLATE OFICIAL DA RECEITA (ESTRUTURA FIXA)
 ================================================================================
 
-4.1 NÚCLEO FUNCIONAL (Prioridade 1):
+3.1 LAYOUT OBRIGATÓRIO:
 
-✅ GESTÃO DE PACIENTES
-- Cadastro com validação de CPF
-- Busca por nome/CPF
-- Edição e exclusão
-- Histórico de receitas por paciente
+```
+═══════════════════════════════════════════════════════════════════════════════════
+🏛️ [BRASÃO]                    PREFEITURA DE PEROBAL
+                               Cidade de todos!
+                                                      Secretaria Municipal de Saúde
 
-✅ GESTÃO DE MEDICAMENTOS
-- Lista dos 36 medicamentos oficiais
-- Busca e filtro por nome
-- Status ativo/inativo
-- Cadastro de novos (se necessário)
+                                RECEITA MÉDICA
 
-✅ GERAÇÃO DE RECEITAS
-- Seleção de paciente
-- Seleção múltipla de medicamentos
-- Posologia por medicamento
-- Observações gerais
-- Preview antes da geração
+Paciente: [NOME_COMPLETO]                    Data de Nascimento: [DD/MM/AAAA]
+CPF/RG: [XXX.XXX.XXX-XX]
 
-✅ SISTEMA DE MÚLTIPLAS RECEITAS
-- Seleção de múltiplas datas
-- Geração em lote (1 PDF com múltiplas páginas)
-- Controle de datas futuras
-- Validação de intervalos
+Medicamentos:
+1. [MEDICAMENTO] [DOSAGEM] - [TIPO]
+   Posologia: [FREQUÊNCIA] (ocultar se vazio)
 
-4.2 FUNCIONALIDADES AVANÇADAS (Prioridade 2):
+[OBSERVAÇÕES GERAIS] (ocultar se vazio)
 
-🔄 RELATÓRIOS E ESTATÍSTICAS
-- Receitas por período
-- Medicamentos mais prescritos
-- Relatório por paciente
+                                          Perobal, [DIA] de [MÊS] de [ANO]
 
-🔄 BACKUP E RESTAURAÇÃO
-- Export/Import do banco SQLite
-- Backup automático semanal
-- Restauração seletiva
+                      __________________________________________________
+                                 Assinatura do Médico
 
-4.3 FUNCIONALIDADES FUTURAS (Prioridade 3):
+      Rua Jaracatiá, 1060 - Telefax (044)3625-1225 - CEP. 87538-000 - PEROBAL - PARANÁ
+═══════════════════════════════════════════════════════════════════════════════════
+```
 
-⏳ TEMPLATES DE RECEITA
-- Receitas modelo por condição
-- Favoritos por profissional
-- Histórico de templates
-
-⏳ CONFIGURAÇÕES AVANÇADAS
-- Personalização do cabeçalho
-- Assinatura digital
-- Múltiplos profissionais
+3.2 REGRAS DE FORMATAÇÃO:
+- Logo: assets/logo-perobal.png (fornecida)
+- Fonte: Helvetica/Arial 11-12pt
+- Centralização: Título, assinatura, endereço
+- Data: Formato extenso à direita
+- Campos opcionais: Ocultar se vazios
 
 ================================================================================
-5. DESIGN E LAYOUT - DIRETRIZES UX/UI
+4. FUNCIONALIDADES CORE (100% CLIENT-SIDE)
 ================================================================================
 
-5.1 PRINCÍPIOS DE DESIGN:
+4.1 GESTÃO DE PACIENTES:
+✅ Cadastro com validação CPF
+✅ Busca por nome/CPF
+✅ Edição e exclusão
+✅ Armazenamento local (SQLite)
 
-🎨 DESIGN SYSTEM:
-- Paleta: health-600 (primária), gray-50/100/200 (neutros)
-- Tipografia: Inter (títulos), system-ui (texto)
-- Espaçamento: 4px, 8px, 16px, 24px, 32px
-- Bordas: 6px (cards), 4px (inputs)
+4.2 MEDICAMENTOS OFICIAIS:
+✅ Lista fixa de 36 medicamentos
+✅ Busca e filtro
+✅ Não editável (dados oficiais)
 
-📱 RESPONSIVIDADE:
-- Mobile-first approach
-- Breakpoints: sm(640px), md(768px), lg(1024px)
-- Grid responsivo: 1 col (mobile), 2-3 cols (desktop)
+4.3 GERAÇÃO DE RECEITAS:
+✅ Seleção de paciente
+✅ Múltiplos medicamentos + posologia
+✅ Múltiplas datas (sistema avançado)
+✅ Template oficial obrigatório
+✅ Export PDF direto no navegador
 
-♿ ACESSIBILIDADE:
-- Contraste mínimo 4.5:1
-- Navegação por teclado
-- Labels descritivos
-- Focus indicators claros
-
-5.2 LAYOUT DAS PÁGINAS PRINCIPAIS:
-
-📊 DASHBOARD:
-```
-+----------------------------------+
-| [Logo] SisMed Perobal      [User]|
-+----------------------------------+
-| [Card] Pacientes: 45             |
-| [Card] Receitas Hoje: 8          |
-| [Card] Medicamentos: 36          |
-+----------------------------------+
-| Receitas Recentes                |
-| [Lista com últimas 5 receitas]   |
-+----------------------------------+
-```
-
-👥 PACIENTES:
-```
-+----------------------------------+
-| [Busca CPF/Nome] [+ Novo Paciente]|
-+----------------------------------+
-| CPF | Nome | Nasc. | Ações       |
-|-----|------|-------|-------------|
-| Data tabular responsiva          |
-+----------------------------------+
-```
-
-💊 RECEITAS (Foco Principal):
-```
-+----------------------------------+
-| 1. Selecionar Paciente           |
-| [Busca] → [Paciente Selecionado] |
-+----------------------------------+
-| 2. Medicamentos                  |
-| [Busca Med] [Lista Selecionados] |
-+----------------------------------+
-| 3. Datas das Receitas            |
-| [☑] Hoje  [☑] +30d  [☑] +60d     |
-+----------------------------------+
-| 4. [Gerar PDF] [Preview]         |
-+----------------------------------+
-```
+4.4 SISTEMA DE MÚLTIPLAS RECEITAS:
+✅ Até 12 receitas por lote
+✅ Datas futuras (máx 6 meses)
+✅ PDF único com múltiplas páginas
+✅ Controle de overflow por página
 
 ================================================================================
-6. LÓGICA DE RECEITAS E MÚLTIPLAS RECEITAS
+5. IMPLEMENTAÇÃO TÉCNICA ATUALIZADA
 ================================================================================
 
-6.1 FLUXO DE GERAÇÃO DE RECEITA ÚNICA:
+5.1 ESTRUTURA DE ARQUIVOS:
 
-```typescript
-// Fluxo Simplificado
-interface SinglePrescriptionFlow {
-    1. validatePatient(patientId: number)
-    2. validateMedicines(medicines: Medicine[])
-    3. validateDate(date: string)
-    4. createPrescription(data: PrescriptionData)
-    5. generatePDF(prescriptionId: number)
-    6. showPreview() || downloadPDF()
-}
+```
+sismed-perobal-v9-offline/
+├── public/
+│   └── assets/
+│       └── logo-perobal.png (✅ Implementado)
+├── src/
+│   ├── components/
+│   │   ├── prescriptions/ (✅ Modularizado)
+│   │   │   ├── PrescriptionHeader.tsx
+│   │   │   ├── MedicinesList.tsx
+│   │   │   ├── PrescriptionObservations.tsx
+│   │   │   └── PrescriptionFooter.tsx
+│   │   └── prescription-form/ (✅ Modularizado)
+│   │       ├── MedicineSelector.tsx
+│   │       └── MedicineList.tsx
+│   ├── hooks/
+│   │   └── usePrescriptionForm.ts (✅ Implementado)
+│   ├── services/
+│   │   └── pdfGenerator.ts (✅ Template oficial)
+│   └── types/
+│       └── index.ts (✅ Padronizado)
+├── dist/ (gerado por npm run build)
+├── abrir-sismed.bat (a criar)
+└── README_Offline.txt (a criar)
 ```
 
-6.2 LÓGICA DE MÚLTIPLAS RECEITAS:
-
-```typescript
-// Sistema de Múltiplas Receitas
-interface MultiplePrescriptionsLogic {
-    selectedDates: Date[];        // Datas selecionadas
-    patientData: Patient;         // Dados do paciente
-    medicines: PrescriptionMedicine[]; // Medicamentos + posologia
-    observations: string;         // Observações gerais
-    
-    // Validações
-    validateDateRange(): boolean;     // Máx 6 meses futuro
-    validateMaxDates(): boolean;      // Máx 12 receitas por lote
-    
-    // Geração
-    createBatchPrescriptions(): Promise<number[]>; // IDs das receitas
-    generateBatchPDF(ids: number[]): Promise<Blob>; // PDF único
-}
-```
-
-6.3 ALGORITMO DE GERAÇÃO PDF:
-
-```typescript
-// Lógica de Paginação Inteligente
-class PDFGenerator {
-    private maxItemsPerPage = 8;      // Máx medicamentos por página
-    private pageHeight = 842;         // A4 em pontos
-    private availableHeight = 600;    // Área útil após cabeçalho/rodapé
-    
-    generateMultiplePrescriptions(prescriptions: Prescription[]): PDFDocument {
-        const doc = new jsPDF('p', 'pt', 'a4');
-        
-        prescriptions.forEach((prescription, index) => {
-            if (index > 0) doc.addPage(); // Nova página para cada receita
-            
-            this.addHeader(doc, prescription.date);
-            this.addPatientInfo(doc, prescription.patient);
-            
-            // Lógica de overflow para medicamentos
-            const medicineGroups = this.groupMedicinesByPage(prescription.medicines);
-            
-            medicineGroups.forEach((group, groupIndex) => {
-                if (groupIndex > 0) {
-                    doc.addPage();
-                    this.addHeader(doc, prescription.date);
-                    this.addContinuationNote(doc);
-                }
-                
-                this.addMedicines(doc, group);
-            });
-            
-            this.addFooter(doc, prescription.date);
-        });
-        
-        return doc;
-    }
-}
-```
-
-6.4 VALIDAÇÕES CRÍTICAS:
-
-✅ VALIDAÇÃO DE DADOS:
-- CPF válido (algoritmo oficial)
-- Datas não retroativas (exceto hoje)
-- Medicamentos obrigatórios
-- Posologia não vazia
-
-✅ VALIDAÇÃO DE NEGÓCIO:
-- Máximo 12 receitas por lote
-- Intervalo máximo de 6 meses
-- Não permitir datas duplicadas
-- Paciente deve existir
+5.2 CORREÇÕES IMPLEMENTADAS:
+✅ Build errors corrigidos
+✅ PrescriptionForm modularizado
+✅ PrescriptionViewer refatorado
+✅ PDF Generator com template oficial
+✅ Logo oficial integrada
+✅ Hooks customizados criados
 
 ================================================================================
-7. SISTEMA DE GERAÇÃO DE PDF
+6. FASE 4 - DISTRIBUIÇÃO ATUALIZADA (SEM ELECTRON)
 ================================================================================
 
-7.1 BIBLIOTECA RECOMENDADA: jsPDF + html2canvas
+6.1 PROCESSO DE BUILD E DISTRIBUIÇÃO:
 
-VANTAGENS:
-- 100% client-side (offline)
-- Suporte a imagens
-- Controle total do layout
-- Integração com React
-
-7.2 TEMPLATE DE RECEITA MÉDICA:
-
-```typescript
-// Estrutura do PDF
-interface PDFTemplate {
-    header: {
-        logo: Image;
-        title: "RECEITUÁRIO MÉDICO";
-        orgInfo: OrganizationData;
-    };
-    
-    patientSection: {
-        name: string;
-        cpf: string;
-        birthDate: string;
-        prescriptionDate: string;
-    };
-    
-    medicinesSection: {
-        title: "MEDICAMENTOS PRESCRITOS:";
-        medicines: Array<{
-            sequence: number;
-            name: string;
-            dosage: string;
-            presentation: string;
-            posology: string;
-            observations?: string;
-        }>;
-    };
-    
-    footer: {
-        observations?: string;
-        signatureLine: string;
-        orgAddress: string;
-        date: string; // "Perobal, DD de MMMM de AAAA"
-    };
-}
+**Etapa 1: Build da Aplicação**
+```bash
+npm run build
+# Gera pasta dist/ com arquivos estáticos
 ```
 
-7.3 FORMATAÇÃO ESPECÍFICA:
-
-📏 MEDIDAS E ESPAÇAMENTOS:
-- Página: A4 (210x297mm)
-- Margens: 20mm (todas)
-- Espaçamento entre linhas: 1.2
-- Font: Arial/Helvetica 11pt (texto), 14pt (títulos)
-
-🎨 LAYOUT VISUAL:
-- Cabeçalho: Logo + Título + Dados Org (fixo, todas as páginas)
-- Dados Paciente: Tabela 2x2 (Nome, CPF, Nasc, Data)
-- Medicamentos: Lista numerada, quebra automática
-- Rodapé: Observações + Assinatura + Endereço
-
-================================================================================
-8. PLANO DE IMPLEMENTAÇÃO (Roadmap)
-================================================================================
-
-8.1 FASE 1 - FUNDAÇÃO (Semana 1-2):
-🏗️ PRIORIDADE CRÍTICA
-
-Dia 1-3: Configuração Base
-- ✅ Setup Vite + React + TypeScript
-- ✅ Instalação e configuração SQLite (sql.js)
-- ✅ Configuração Tailwind + shadcn/ui
-- ✅ Estrutura de diretórios definitiva
-
-Dia 4-7: Camada de Dados
-- 🔄 Implementação do serviço database.ts
-- 🔄 Criação das tabelas SQLite
-- 🔄 Sistema de migrations
-- 🔄 Seed dos 36 medicamentos oficiais
-
-Dia 8-14: CRUD Básico
-- 🔄 Gestão de Pacientes (CRUD completo)
-- 🔄 Gestão de Medicamentos (listagem + busca)
-- 🔄 Validações básicas
-- 🔄 Testes das operações de banco
-
-8.2 FASE 2 - FUNCIONALIDADES CORE (Semana 3-4):
-⚡ PRIORIDADE ALTA
-
-Dia 15-21: Sistema de Receitas
-- 🔄 Formulário de receita (componente refatorado)
-- 🔄 Seleção de medicamentos + posologia
-- 🔄 Sistema de validações avançadas
-- 🔄 Preview da receita
-
-Dia 22-28: Geração de PDF
-- 🔄 Implementação jsPDF + template
-- 🔄 Layout conforme especificação oficial
-- 🔄 Sistema de múltiplas receitas
-- 🔄 Funcionalidade de impressão
-
-8.3 FASE 3 - REFINAMENTO (Semana 5-6):
-🎨 PRIORIDADE MÉDIA
-
-Dia 29-35: UX/UI Enhancement
-- 🔄 Dashboard com estatísticas básicas
-- 🔄 Melhorias de responsividade
-- 🔄 Loading states e feedback visual
-- 🔄 Error boundaries
-
-Dia 36-42: Recursos Avançados
-- 🔄 Sistema de backup/restore
-- 🔄 Configurações do sistema
-- 🔄 Relatórios básicos
-- 🔄 Testes E2E com Playwright
-
-8.4 FASE 4 - DISTRIBUIÇÃO (Semana 7):
-📦 ENTREGA FINAL
-
-Dia 43-49: Empacotamento
-- 🔄 Build otimizado para produção
-- 🔄 Electron wrapper (executável .exe)
-- 🔄 Instalador Windows (NSIS)
-- 🔄 Documentação do usuário
-
-================================================================================
-9. ESTRATÉGIAS DE PREVENÇÃO DE BUGS
-================================================================================
-
-9.1 TIPAGEM FORTE (TypeScript):
-
-```typescript
-// Tipos rígidos para prevenir erros
-interface Patient {
-    id: number;
-    nome: string;
-    cpf: string | null;
-    dataNascimento: string | null; // ISO format
-    createdAt: string;
-    updatedAt: string;
-}
-
-// Tipos de validação
-type ValidationResult<T> = {
-    isValid: boolean;
-    data?: T;
-    errors: string[];
-};
-
-// Tipos de estados
-type LoadingState = 'idle' | 'loading' | 'success' | 'error';
+**Etapa 2: Teste Local**
+```bash
+npx serve dist
+# Acesso via http://localhost:3000
 ```
 
-9.2 SISTEMA DE VALIDAÇÃO ROBUSTO:
+**Etapa 3: Validação Offline**
+- Desconectar internet
+- Verificar funcionamento completo
+- Testar geração de PDF
+- Validar banco SQLite no navegador
 
-```typescript
-// Validadores por contexto
-class ValidationService {
-    static validateCPF(cpf: string): ValidationResult<string> {
-        // Algoritmo oficial de validação CPF
-    }
-    
-    static validatePrescriptionData(data: PrescriptionFormData): ValidationResult<PrescriptionData> {
-        // Validação completa dos dados da receita
-    }
-    
-    static validateDateRange(dates: Date[]): ValidationResult<Date[]> {
-        // Validação de datas múltiplas
-    }
-}
+**Etapa 4: Empacotamento para Distribuição**
+```
+SisMed-Perobal-v9/
+├── dist/ (pasta completa do build)
+├── abrir-sismed.bat
+├── README_Offline.txt
+└── Medicamentos_Oficiais.pdf (lista de referência)
 ```
 
-9.3 ERROR BOUNDARIES E TRATAMENTO:
-
-```typescript
-// Component wrapper para captura de erros
-export function withErrorBoundary<T>(Component: React.ComponentType<T>) {
-    return function WrappedComponent(props: T) {
-        return (
-            <ErrorBoundary fallback={<ErrorFallback />}>
-                <Component {...props} />
-            </ErrorBoundary>
-        );
-    };
-}
+6.2 SCRIPT DE ABERTURA (abrir-sismed.bat):
+```batch
+@echo off
+echo Iniciando SisMed Perobal v9.0...
+echo Aguarde a abertura do navegador...
+cd dist
+npx serve . --single
+pause
 ```
 
-9.4 TESTES AUTOMATIZADOS:
+6.3 MANUAL DE INSTALAÇÃO (README_Offline.txt):
+```
+SISMED PEROBAL v9.0 - SISTEMA OFFLINE
+====================================
 
-```typescript
-// Estrutura de testes por camada
-tests/
-├── unit/
-│   ├── services/database.test.ts
-│   ├── utils/validation.test.ts
-│   └── hooks/useDatabase.test.ts
-├── integration/
-│   ├── patient-crud.test.ts
-│   ├── prescription-generation.test.ts
-│   └── pdf-creation.test.ts
-└── e2e/
-    ├── complete-workflow.spec.ts
-    └── multiple-prescriptions.spec.ts
+REQUISITOS:
+- Windows 10/11
+- Google Chrome ou Microsoft Edge
+- Node.js (para npx serve)
+
+INSTALAÇÃO:
+1. Extrair pasta SisMed-Perobal-v9 no computador
+2. Executar "abrir-sismed.bat"
+3. Aguardar abertura do navegador
+4. Acessar: http://localhost:3000
+
+FUNCIONAMENTO:
+- 100% offline (sem internet necessária)
+- Dados salvos localmente no navegador
+- PDF gerado diretamente no browser
+- Backup automático via localStorage
+
+SUPORTE:
+- Secretaria Municipal de Saúde de Perobal
+- Telefax: (044) 3625-1225
 ```
 
 ================================================================================
-10. MÉTRICAS DE QUALIDADE E MONITORAMENTO
+7. CHECKLIST DE VALIDAÇÃO FINAL
 ================================================================================
 
-10.1 INDICADORES DE QUALIDADE:
+7.1 FUNCIONALIDADES CORE:
+□ Cadastro de pacientes funcional
+□ Lista de 36 medicamentos carregada
+□ Geração de receita única
+□ Sistema de múltiplas receitas (até 12)
+□ PDF com template oficial
+□ Funcionamento 100% offline
 
-📊 MÉTRICAS DE CÓDIGO:
-- Cobertura de testes: >80%
-- Complexidade ciclomática: <10 por função
-- Linhas por arquivo: <300 (componentes), <150 (hooks)
-- Dependências: <50 packages
+7.2 VALIDAÇÃO TÉCNICA:
+□ npm run build sem erros
+□ npx serve dist funcional
+□ SQLite operando no navegador
+□ localStorage como cache
+□ Nenhuma dependência externa
+□ Compatibilidade Chrome/Edge
 
-⚡ MÉTRICAS DE PERFORMANCE:
-- Bundle size: <2MB (total)
-- First Load: <3s
-- PDF Generation: <5s (até 12 receitas)
-- Database queries: <100ms (95th percentile)
-
-🔒 MÉTRICAS DE CONFIABILIDADE:
-- Error rate: <1% das operações
-- Crash rate: <0.1%
-- Data integrity: 100% (validação + backup)
-
-10.2 FERRAMENTAS DE MONITORAMENTO:
-
-```typescript
-// Sistema básico de logging
-class Logger {
-    static info(message: string, context?: any) {
-        console.log(`[INFO] ${new Date().toISOString()} - ${message}`, context);
-        // Persist to localStorage for debugging
-    }
-    
-    static error(message: string, error?: Error, context?: any) {
-        console.error(`[ERROR] ${new Date().toISOString()} - ${message}`, error, context);
-        // Store error for later analysis
-    }
-}
-```
+7.3 DISTRIBUIÇÃO:
+□ Pasta dist completa
+□ Script abrir-sismed.bat
+□ README_Offline.txt
+□ Logo oficial integrada
+□ Template receita conforme especificação
 
 ================================================================================
-11. RECOMENDAÇÕES TÉCNICAS ESPECÍFICAS
+8. CRONOGRAMA ATUALIZADO (5 DIAS)
 ================================================================================
 
-11.1 REFATORAÇÃO IMEDIATA (Esta Sprint):
+📅 DIA 1: Correções Finais
+✅ Build errors corrigidos
+✅ Componentes modularizados
+✅ Logo oficial integrada
 
-🔧 COMPONENTES LONGOS:
-- PrescriptionForm.tsx (388 linhas) → Dividir em 4 componentes menores
-- Prescriptions.tsx (584 linhas) → Extrair lógica para hooks customizados
-- Criar hooks: usePrescriptionForm, usePrescriptionList, usePDFGeneration
+📅 DIA 2: Template PDF Oficial
+✅ PDF Generator atualizado
+✅ Layout conforme especificação
+□ Testes de geração múltipla
 
-🔧 INCONSISTÊNCIAS DE DADOS:
-- Unificar interface Patient (remover campos conflitantes)
-- Padronizar nomenclatura (português vs inglês)
-- Implementar validação de schema com Zod
+📅 DIA 3: Integração SQLite
+□ sql.js configurado
+□ Migração de localStorage
+□ 36 medicamentos oficiais
 
-11.2 ARQUITETURA DE MÉDIO PRAZO:
+📅 DIA 4: Testes Offline
+□ Validação sem internet
+□ Performance no navegador
+□ Compatibilidade Chrome/Edge
 
-🏗️ CAMADA DE SERVIÇOS:
-```typescript
-// Abstração de data access
-interface PatientRepository {
-    findAll(): Promise<Patient[]>;
-    findById(id: number): Promise<Patient | null>;
-    create(data: CreatePatientData): Promise<Patient>;
-    update(id: number, data: UpdatePatientData): Promise<Patient>;
-    delete(id: number): Promise<void>;
-}
-
-// Implementação SQLite
-class SQLitePatientRepository implements PatientRepository {
-    // Implementação específica...
-}
-```
-
-🏗️ STATE MANAGEMENT:
-- Implementar Zustand para estado global
-- Context específicos por domínio (Patients, Prescriptions)
-- Cache inteligente com React Query
-
-11.3 PERFORMANCE E OTIMIZAÇÃO:
-
-⚡ LAZY LOADING:
-```typescript
-// Lazy loading de páginas
-const Patients = lazy(() => import('./pages/Patients'));
-const Medicines = lazy(() => import('./pages/Medicines'));
-const Prescriptions = lazy(() => import('./pages/Prescriptions'));
-```
-
-⚡ MEMOIZAÇÃO:
-```typescript
-// Memoização de componentes pesados
-const PatientTable = memo(({ patients, onEdit, onDelete }: PatientTableProps) => {
-    // Component implementation
-});
-
-// Custom hooks com useMemo
-const useFilteredPatients = (patients: Patient[], searchTerm: string) => {
-    return useMemo(() => {
-        return patients.filter(/* filtro complexo */);
-    }, [patients, searchTerm]);
-};
-```
+📅 DIA 5: Empacotamento Final
+□ Build otimizado
+□ Scripts de distribuição
+□ Documentação completa
 
 ================================================================================
-12. CRONOGRAMA DE IMPLEMENTAÇÃO DETALHADO
+9. BENEFÍCIOS DA NOVA ARQUITETURA
 ================================================================================
 
-📅 SEMANA 1-2: FUNDAÇÃO
-- Dias 1-2: Setup ambiente + dependências
-- Dias 3-4: Configuração SQLite + migrações
-- Dias 5-7: CRUD Pacientes + validações
-- Dias 8-10: CRUD Medicamentos + seed oficial
-- Dias 11-14: Testes unitários da camada de dados
+9.1 TÉCNICOS:
+✅ Sem custos de Electron
+✅ Instalação simplificada
+✅ Funcionamento garantido offline
+✅ Atualizações via substituição de pasta
+✅ Compatibilidade Windows nativa
 
-📅 SEMANA 3-4: CORE FEATURES
-- Dias 15-17: Refatoração PrescriptionForm
-- Dias 18-20: Sistema de múltiplas receitas
-- Dias 21-23: Implementação jsPDF + template
-- Dias 24-26: Geração PDF com layout oficial
-- Dias 27-28: Testes integração receitas + PDF
+9.2 OPERACIONAIS:
+✅ Distribuição via pendrive/email
+✅ Múltiplos computadores (mesmo build)
+✅ Backup automático localStorage
+✅ PDF oficial sem dependências
+✅ Manutenção técnica simplificada
 
-📅 SEMANA 5-6: POLISH & FEATURES
-- Dias 29-31: Dashboard com métricas
-- Dias 32-33: Sistema backup/restore
-- Dias 34-35: Melhorias UX/UI
-- Dias 36-38: Relatórios básicos
-- Dias 39-42: Testes E2E completos
-
-📅 SEMANA 7: ENTREGA
-- Dias 43-45: Build produção + Electron
-- Dias 46-47: Instalador Windows
-- Dias 48-49: Documentação + deploy
+9.3 USUÁRIO FINAL:
+✅ Interface familiar (navegador)
+✅ Funcionamento instantâneo
+✅ Receitas com layout oficial
+✅ Sistema de múltiplas datas
+✅ Impressão direta do navegador
 
 ================================================================================
-13. CONCLUSÃO E PRÓXIMOS PASSOS
+CONCLUSÃO
 ================================================================================
 
-13.1 RESUMO EXECUTIVO:
+A arquitetura 100% client-side no navegador oferece a melhor relação custo-benefício para o SisMed Perobal, mantendo todas as funcionalidades planejadas sem a complexidade de empacotamento executável.
 
-O projeto SisMed Perobal v9.0 possui uma base sólida, mas requer refatoração arquitetural para alcançar seu potencial completo. A transição para uma arquitetura 100% offline com SQLite client-side resolverá as inconsistências atuais e fornecerá uma base sustentável para crescimento futuro.
-
-13.2 BENEFÍCIOS ESPERADOS:
-
-🎯 TÉCNICOS:
-- Redução de 60% na complexidade do código
-- Eliminação de inconsistências de dados
-- Melhoria de 3x na performance de geração PDF
-- Cobertura de testes de >80%
-
-🎯 USUÁRIO FINAL:
-- Interface mais responsiva e intuitiva
-- Geração de receitas 5x mais rápida
-- Sistema de múltiplas receitas robusto
-- Funcionamento 100% offline garantido
-
-🎯 MANUTENIBILIDADE:
-- Código 50% mais legível
-- Redução de bugs em 70%
-- Facilidade para adicionar novas funcionalidades
-- Documentação técnica completa
-
-13.3 RISCOS MITIGADOS:
-
-⚠️ RISCO TÉCNICO: Complexidade de migração
-   MITIGAÇÃO: Implementação gradual + testes extensivos
-
-⚠️ RISCO OPERACIONAL: Interrupção do sistema
-   MITIGAÇÃO: Versioning + rollback strategy
-
-⚠️ RISCO DE QUALIDADE: Regressões funcionais
-   MITIGAÇÃO: Testes automatizados + validação manual
+O sistema funcionará de forma robusta e confiável em qualquer computador Windows com navegador moderno, garantindo produtividade e conformidade com os padrões oficiais da Secretaria Municipal de Saúde de Perobal.
 
 ================================================================================
-
-📋 CHECKLIST DE IMPLEMENTAÇÃO IMEDIATA:
-
-□ 1. Definir arquitetura final (100% offline vs híbrida)
-□ 2. Refatorar PrescriptionForm.tsx (dividir em componentes menores)
-□ 3. Implementar geração de PDF funcional
-□ 4. Corrigir inconsistências de tipos TypeScript
-□ 5. Criar sistema de validação robusto
-□ 6. Implementar testes unitários críticos
-□ 7. Documentar decisões arquiteturais
-□ 8. Estabelecer pipeline de CI/CD básico
-
-================================================================================
-RESPONSÁVEL TÉCNICO: [Nome do Desenvolvedor]
-DATA DE CRIAÇÃO: 06/07/2025
-VERSÃO DO DOCUMENTO: 1.0
-PRÓXIMA REVISÃO: 13/07/2025
+RESPONSÁVEL TÉCNICO: Sistema Atualizado
+DATA DE ATUALIZAÇÃO: 07/07/2025
+VERSÃO DO DOCUMENTO: 2.0
+PRÓXIMA REVISÃO: 14/07/2025
 ================================================================================

@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+
+import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import PatientForm from '@/components/PatientForm';
 import PatientTable from '@/components/PatientTable';
@@ -6,10 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Plus } from 'lucide-react';
 import { usePatients } from '@/hooks/usePatients';
+import { Patient } from '@/types';
 
 const Patients = () => {
   const [showForm, setShowForm] = useState(false);
-  const [editingPatient, setEditingPatient] = useState(null);
+  const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
   const { patients, isLoading, deletePatient } = usePatients();
 
   const handleNewPatient = () => {
@@ -17,13 +19,13 @@ const Patients = () => {
     setShowForm(true);
   };
 
-  const handleEditPatient = (patient) => {
+  const handleEditPatient = (patient: Patient) => {
     setEditingPatient(patient);
     setShowForm(true);
   };
 
   const handleFormSuccess = () => {
-    setShowForm(false);
+    setShowForm(false);  
     setEditingPatient(null);
   };
 
@@ -64,7 +66,7 @@ const Patients = () => {
             </CardHeader>
             <CardContent>
               <PatientForm 
-                patient={editingPatient}
+                initialData={editingPatient}
                 onSuccess={handleFormSuccess}
                 onCancel={() => setShowForm(false)}
               />
@@ -81,8 +83,8 @@ const Patients = () => {
               ) : (
                 <PatientTable 
                   patients={patients}
-                  onEditPatient={handleEditPatient}
-                  onPatientDeleted={() => handleDelete}
+                  onEdit={handleEditPatient}
+                  onDelete={handleDelete}
                 />
               )}
             </CardContent>

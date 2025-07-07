@@ -30,6 +30,10 @@ export class PDFGenerator {
       this.addMedicines(doc, group, groupIndex > 0 ? 0 : 220);
     });
     
+    if (prescription.observacoes) {
+      this.addObservations(doc, prescription.observacoes);
+    }
+    
     this.addFooter(doc, prescription.data);
     
     return doc.output('blob');
@@ -59,31 +63,38 @@ export class PDFGenerator {
         this.addMedicines(doc, group, groupIndex > 0 ? 160 : 220);
       });
       
-      this.addFooter(doc, prescription.data);
-      
       if (prescription.observacoes) {
         this.addObservations(doc, prescription.observacoes);
       }
+      
+      this.addFooter(doc, prescription.data);
     });
     
     return doc.output('blob');
   }
 
   private static addHeader(doc: jsPDF): void {
-    // Cabeçalho: "RECEITUÁRIO MÉDICO"
+    // Logo da Prefeitura (se disponível)
+    try {
+      // Placeholder para logo - será carregada dinamicamente
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('PREFEITURA DE PEROBAL', 60, 40);
+      doc.text('Cidade de todos!', 60, 55);
+      
+      doc.text('SECRETARIA MUNICIPAL DE SAÚDE', 400, 40);
+    } catch (error) {
+      console.log('Logo não encontrada, continuando sem imagem');
+    }
+    
+    // Título principal centralizado
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('PREFEITURA MUNICIPAL DE PEROBAL', 297, 40, { align: 'center' });
-    
-    doc.setFontSize(14);
-    doc.text('SECRETARIA MUNICIPAL DE SAÚDE', 297, 60, { align: 'center' });
-    
-    doc.setFontSize(16);
-    doc.text('RECEITUÁRIO MÉDICO', 297, 90, { align: 'center' });
+    doc.text('RECEITA MÉDICA', 297, 90, { align: 'center' });
     
     // Linha separadora
     doc.setLineWidth(1);
-    doc.line(40, 100, 555, 100);
+    doc.line(40, 105, 555, 105);
   }
 
   private static addPatientInfo(doc: jsPDF, patient: Patient): void {
@@ -92,92 +103,105 @@ export class PDFGenerator {
     
     let yPosition = 130;
     
+    // Dados do paciente em linha única
     doc.setFont('helvetica', 'bold');
     doc.text('Paciente:', 40, yPosition);
     doc.setFont('helvetica', 'normal');
     doc.text(patient.nome, 100, yPosition);
     
-    yPosition += 20;
-    if (patient.cpf) {
-      doc.setFont('helvetica', 'bold');
-      doc.text('CPF:', 40, yPosition);
-      doc.setFont('helvetica', 'normal');
-      doc.text(patient.cpf, 80, yPosition);
-      yPosition += 20;
-    }
-    
+    // Data de nascimento alinhada à direita
     if (patient.dataNascimento) {
       doc.setFont('helvetica', 'bold');
-      doc.text('Data Nasc.:', 40, yPosition);
+      doc.text('Data de Nascimento:', 350, yPosition);
       doc.setFont('helvetica', 'normal');
-      doc.text(this.formatDate(patient.dataNascimento), 120, yPosition);
+      doc.text(this.formatDate(patient.dataNascimento), 480, yPosition);
+    }
+    
+    yPosition += 20;
+    
+    // CPF
+    if (patient.cpf) {
+      doc.setFont('helvetica', 'bold');
+      doc.text('CPF/RG:', 40, yPosition);
+      doc.setFont('helvetica', 'normal');
+      doc.text(patient.cpf, 100, yPosition);
     }
   }
 
   private static addPrescriptionDate(doc: jsPDF, date: string): void {
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Data:', 400, 130);
-    doc.setFont('helvetica', 'normal');
-    doc.text(this.formatDate(date), 440, 130);
+    // Data será adicionada no rodapé conforme template oficial
   }
 
-  private static addMedicines(doc: jsPDF, medicines: any[], startY: number = 220): void {
+  private static addMedicines(doc: jsPDF, medicines: any[], startY: number = 180): void {
     let yPosition = startY;
     
-    doc.setFontSize(14);
+    doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
-    doc.text('MEDICAMENTOS PRESCRITOS:', 40, yPosition - 20);
+    doc.text('Medicamentos:', 40, yPosition);
+    yPosition += 20;
     
     medicines.forEach((medicine, index) => {
       const medicineData = getMedicineByIdSync(medicine.medicamentoId);
       if (medicineData) {
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        doc.text(`${index + 1}. ${medicineData.nome} - ${medicineData.dosagem}`, 40, yPosition);
-        
         doc.setFont('helvetica', 'normal');
-        doc.text(`    (${medicineData.apresentacao})`, 40, yPosition + 15);
-        doc.text(`    ${medicine.posologia}`, 40, yPosition + 30);
         
-        yPosition += 60;
+        // Numeração + Nome do medicamento
+        const medicineText = `${index + 1}. ${medicineData.nome} ${medicineData.dosagem} - ${medicineData.apresentacao}`;
+        doc.text(medicineText, 40, yPosition);
+        yPosition += 15;
+        
+        // Posologia (se houver)
+        if (medicine.posologia && medicine.posologia.trim()) {
+          doc.text(`   Posologia: ${medicine.posologia}`, 40, yPosition);
+          yPosition += 15;
+        }
+        
+        yPosition += 5; // Espaço entre medicamentos
       }
     });
   }
 
   private static addObservations(doc: jsPDF, observations: string): void {
+    if (!observations || !observations.trim()) return;
+    
     const pageHeight = doc.internal.pageSize.height;
-    const yPosition = pageHeight - 150;
+    let yPosition = pageHeight - 200;
     
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
-    doc.text('OBSERVAÇÕES:', 40, yPosition);
+    doc.text('Observações Gerais:', 40, yPosition);
     
+    yPosition += 15;
     doc.setFont('helvetica', 'normal');
     const splitText = doc.splitTextToSize(observations, 500);
-    doc.text(splitText, 40, yPosition + 20);
+    doc.text(splitText, 40, yPosition);
   }
 
   private static addFooter(doc: jsPDF, date: string): void {
     const pageHeight = doc.internal.pageSize.height;
-    const yPosition = pageHeight - 100;
+    let yPosition = pageHeight - 120;
     
+    // Data formatada por extenso, alinhada à direita
     const formattedDate = this.formatDateExtensive(date);
-    doc.setFontSize(10);
+    doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text(formattedDate, 420, yPosition - 40, { align: 'right' });
+    doc.text(formattedDate, 555, yPosition, { align: 'right' });
     
-    // Linha para assinatura
+    yPosition += 30;
+    
+    // Linha para assinatura centralizada
     doc.setLineWidth(1);
     doc.line(200, yPosition, 400, yPosition);
     
-    doc.setFontSize(10);
-    doc.text('Assinatura do Profissional', 300, yPosition + 15, { align: 'center' });
+    yPosition += 15;
+    doc.setFontSize(11);
+    doc.text('Assinatura do Médico', 300, yPosition, { align: 'center' });
     
-    // Rodapé da organização
-    doc.setFontSize(8);
-    doc.text('Rua Jaracatiá, 1060 - Telefax (044)3625-1225 CEP. 87538-000 PEROBAL - PARANÁ', 
-             297, pageHeight - 20, { align: 'center' });
+    // Rodapé da organização centralizado
+    yPosition += 30;
+    doc.setFontSize(9);
+    doc.text('Rua Jaracatiá, 1060 - Telefax (044)3625-1225 - CEP. 87538-000 - PEROBAL - PARANÁ', 
+             297, yPosition, { align: 'center' });
   }
 
   private static addContinuationNote(doc: jsPDF, patientName: string): void {

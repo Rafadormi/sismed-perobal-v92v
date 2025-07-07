@@ -21,8 +21,8 @@ const PrescriptionHeader = ({ prescription, patient }: PrescriptionHeaderProps) 
       <div className="border-b pb-4 mb-6 no-print">
         <div className="text-center">
           <img 
-            src="/lovable-uploads/2da6758a-bafa-4440-9d4f-d8f29482cec7.png" 
-            alt="Prefeitura Municipal de Perobal" 
+            src="/assets/logo-perobal.png" 
+            alt="Prefeitura Municipal de Perobal - Cidade de todos!" 
             className="mx-auto mb-4 max-h-32"
           />
           <h2 className="text-2xl font-bold mb-1">Receituário Médico</h2>
@@ -59,33 +59,38 @@ const PrescriptionHeader = ({ prescription, patient }: PrescriptionHeaderProps) 
 
       {/* Print version */}
       <div className="print-only">
-        <img 
-          src="/lovable-uploads/2da6758a-bafa-4440-9d4f-d8f29482cec7.png" 
-          alt="Prefeitura Municipal de Perobal" 
-          className="w-full max-h-24 object-contain mb-4"
-        />
-        <h2 className="text-xl font-bold mb-4 text-center">RECEITUÁRIO MÉDICO</h2>
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <img 
+              src="/assets/logo-perobal.png" 
+              alt="Brasão de Perobal" 
+              className="h-16 w-16 object-contain mb-2"
+            />
+            <div className="text-sm">
+              <p className="font-bold">Prefeitura de Perobal</p>
+              <p className="text-xs">Cidade de todos!</p>
+            </div>
+          </div>
+          <div className="text-sm text-right">
+            <p className="font-bold">Secretaria Municipal de Saúde</p>
+          </div>
+        </div>
         
-        <table className="w-full mb-4">
-          <tbody>
-            <tr>
-              <td className="align-top py-1">
-                <strong>Paciente:</strong> {patient.nome}
-              </td>
-              <td className="align-top py-1">
-                <strong>Data:</strong> {formatDate(prescription.data)}
-              </td>
-            </tr>
-            <tr>
-              <td className="align-top py-1">
-                <strong>CPF:</strong> {patient.cpf}
-              </td>
-              <td className="align-top py-1">
-                <strong>Data Nasc.:</strong> {formatDate(patient.dataNascimento)}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <h2 className="text-xl font-bold mb-4 text-center">RECEITA MÉDICA</h2>
+        
+        <div className="mb-4 text-sm">
+          <div className="flex justify-between">
+            <span>
+              <strong>Paciente:</strong> {patient.nome}
+            </span>
+            <span>
+              <strong>Data de Nascimento:</strong> {formatDate(patient.dataNascimento)}
+            </span>
+          </div>
+          <div className="mt-1">
+            <strong>CPF/RG:</strong> {patient.cpf}
+          </div>
+        </div>
       </div>
     </>
   );

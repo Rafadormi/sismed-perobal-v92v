@@ -27,16 +27,18 @@ const MedicinesList = ({ prescription }: MedicinesListProps) => {
       </div>
 
       {/* Print version */}
-      <div className="border-t border-b py-3 my-4 print-only">
-        <h3 className="font-bold mb-2">MEDICAMENTOS PRESCRITOS:</h3>
+      <div className="print-only">
+        <h3 className="font-bold mb-2">Medicamentos:</h3>
         
-        <ol className="list-decimal pl-6 space-y-6">
+        <ol className="list-decimal pl-6 space-y-3">
           {prescription.medicamentos.map((med, index) => {
             const medicine = getMedicineByIdSync(med.medicamentoId);
             return (
               <li key={index} className="mb-2">
-                <p className="font-bold">{medicine?.nome} - {medicine?.dosagem} ({medicine?.apresentacao})</p>
-                <p>{med.posologia}</p>
+                <p className="font-medium">{medicine?.nome} {medicine?.dosagem} - {medicine?.apresentacao}</p>
+                {med.posologia && med.posologia.trim() && (
+                  <p className="ml-3 text-sm">Posologia: {med.posologia}</p>
+                )}
               </li>
             );
           })}
