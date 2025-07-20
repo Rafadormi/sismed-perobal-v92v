@@ -1,14 +1,13 @@
 
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMedicines } from '@/hooks/useMedicines';
 import { usePrescriptionForm } from '@/hooks/usePrescriptionForm';
 import PrescriptionDateSelector from './PrescriptionDateSelector';
 import MedicineSelector from './prescription-form/MedicineSelector';
 import MedicineList from './prescription-form/MedicineList';
+import PrescriptionObservations from './prescription-form/PrescriptionObservations';
+import PrescriptionSubmitButton from './prescription-form/PrescriptionSubmitButton';
 
 interface PrescriptionFormProps {
   patientId?: number;
@@ -83,29 +82,17 @@ const PrescriptionForm = ({ patientId, onSuccess }: PrescriptionFormProps) => {
           </TabsContent>
         </Tabs>
 
-        <div className="space-y-2">
-          <Label htmlFor="observacoes">Observações</Label>
-          <Textarea
-            id="observacoes"
-            name="observacoes"
-            placeholder="Observações adicionais para a receita"
-            value={observations}
-            onChange={(e) => setObservations(e.target.value)}
-            rows={3}
-          />
-        </div>
+        <PrescriptionObservations
+          observations={observations}
+          onObservationsChange={setObservations}
+        />
         
-        <div className="flex justify-end">
-          <Button
-            type="submit"
-            className="bg-health-600 hover:bg-health-700"
-            disabled={isSubmitting || !patientId || selectedMedicines.length === 0}
-          >
-            {isSubmitting ? 'Gerando...' : prescriptionDates.filter(d => d.enabled).length > 1 
-              ? `Gerar ${prescriptionDates.filter(d => d.enabled).length} Receitas` 
-              : 'Gerar Receita'}
-          </Button>
-        </div>
+        <PrescriptionSubmitButton
+          isSubmitting={isSubmitting}
+          patientId={patientId}
+          selectedMedicines={selectedMedicines}
+          prescriptionDates={prescriptionDates}
+        />
       </form>
     </Card>
   );
