@@ -59,24 +59,24 @@ const PrescriptionHeader = ({ prescription, patient }: PrescriptionHeaderProps) 
 
       {/* Print version */}
       <div className="print-only">
-        <div class="flex justify-between items-start mb-6">
-          <div class="flex items-center">
+        <div className="flex justify-between items-start mb-6">
+          <div className="flex items-center">
             <img 
               src="/lovable-uploads/691ec7a3-d30a-49df-b439-78a738b3aac6.png" 
               alt="Brasão da Prefeitura de Perobal" 
-              class="h-20 w-20 object-contain mr-4"
+              className="h-20 w-20 object-contain mr-4"
             />
             <div>
-              <h1 class="text-lg font-bold text-gray-800">PREFEITURA MUNICIPAL DE PEROBAL</h1>
-              <p class="text-sm text-gray-600 font-medium">SECRETARIA MUNICIPAL DE SAÚDE</p>
-              <p class="text-xs text-gray-500">CNPJ: 76.460.526/0001-16</p>
-              <p class="text-xs text-gray-500">Rua Jaracatiá, 1060 - CEP 87538-000 - Perobal - PR</p>
-              <p class="text-xs text-gray-500">Telefax: (44) 3625-1225</p>
+              <h1 className="text-lg font-bold text-gray-800">PREFEITURA MUNICIPAL DE PEROBAL</h1>
+              <p className="text-sm text-gray-600 font-medium">SECRETARIA MUNICIPAL DE SAÚDE</p>
+              <p className="text-xs text-gray-500">CNPJ: 76.460.526/0001-16</p>
+              <p className="text-xs text-gray-500">Rua Jaracatiá, 1060 - CEP 87538-000 - Perobal - PR</p>
+              <p className="text-xs text-gray-500">Telefax: (44) 3625-1225</p>
             </div>
           </div>
-          <div class="text-right text-sm">
-            <p class="font-bold">RECEITA MÉDICA</p>
-            <p class="text-xs text-gray-600">Data: {formatDate(prescription.data)}</p>
+          <div className="text-right text-sm">
+            <p className="font-bold">RECEITA MÉDICA</p>
+            <p className="text-xs text-gray-600">Data: {formatDate(prescription.data)}</p>
           </div>
         </div>
         
