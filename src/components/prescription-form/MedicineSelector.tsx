@@ -40,10 +40,10 @@ const MedicineSelector = ({
   );
 
   const handleAddMedicine = () => {
-    if (!selectedMedicine || !posologia) {
+    if (!selectedMedicine) {
       toast({
-        title: "Campos obrigatórios",
-        description: "Selecione um medicamento e informe a posologia",
+        title: "Medicamento obrigatório",
+        description: "Selecione um medicamento",
         variant: "destructive"
       });
       return;
@@ -51,7 +51,7 @@ const MedicineSelector = ({
 
     const newMedication: PrescriptionMedicine = {
       medicamentoId: selectedMedicine,
-      posologia: posologia
+      posologia: posologia.trim() || "Conforme orientação médica"
     };
 
     onAddMedicine(newMedication);
@@ -59,6 +59,11 @@ const MedicineSelector = ({
     // Limpar os campos
     setSelectedMedicine(null);
     setPosologia("");
+    
+    toast({
+      title: "Medicamento adicionado",
+      description: "Medicamento adicionado à receita com sucesso"
+    });
   };
 
   return (
@@ -119,21 +124,26 @@ const MedicineSelector = ({
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="posologia">Posologia</Label>
+        <Label htmlFor="posologia">
+          Posologia <span className="text-sm text-gray-500">(opcional)</span>
+        </Label>
         <Textarea
           id="posologia"
           value={posologia}
           onChange={(e) => setPosologia(e.target.value)}
-          placeholder="Ex: Tomar 1 comprimido a cada 8 horas por 7 dias"
+          placeholder="Ex: Tomar 1 comprimido a cada 8 horas por 7 dias (deixe vazio para usar 'Conforme orientação médica')"
           rows={2}
         />
+        <p className="text-xs text-gray-500">
+          Se não informada, será preenchida automaticamente com "Conforme orientação médica"
+        </p>
       </div>
       
       <Button
         type="button"
         onClick={handleAddMedicine}
         className="w-full bg-health-600 hover:bg-health-700"
-        disabled={!selectedMedicine || !posologia}
+        disabled={!selectedMedicine}
       >
         <Plus className="mr-2 h-4 w-4" />
         Adicionar Medicamento à Receita

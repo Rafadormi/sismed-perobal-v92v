@@ -21,8 +21,8 @@ const PrescriptionHeader = ({ prescription, patient }: PrescriptionHeaderProps) 
       <div className="border-b pb-4 mb-6 no-print">
         <div className="text-center">
           <img 
-            src="/assets/logo-perobal.png" 
-            alt="Prefeitura Municipal de Perobal - Cidade de todos!" 
+            src="/lovable-uploads/691ec7a3-d30a-49df-b439-78a738b3aac6.png" 
+            alt="Prefeitura Municipal de Perobal - Sistema de Saúde" 
             className="mx-auto mb-4 max-h-32"
           />
           <h2 className="text-2xl font-bold mb-1">Receituário Médico</h2>
@@ -59,36 +59,36 @@ const PrescriptionHeader = ({ prescription, patient }: PrescriptionHeaderProps) 
 
       {/* Print version */}
       <div className="print-only">
-        <div className="flex justify-between items-start mb-4">
-          <div>
+        <div class="flex justify-between items-start mb-6">
+          <div class="flex items-center">
             <img 
-              src="/assets/logo-perobal.png" 
-              alt="Brasão de Perobal" 
-              className="h-16 w-16 object-contain mb-2"
+              src="/lovable-uploads/691ec7a3-d30a-49df-b439-78a738b3aac6.png" 
+              alt="Brasão da Prefeitura de Perobal" 
+              class="h-20 w-20 object-contain mr-4"
             />
-            <div className="text-sm">
-              <p className="font-bold">Prefeitura de Perobal</p>
-              <p className="text-xs">Cidade de todos!</p>
+            <div>
+              <h1 class="text-lg font-bold text-gray-800">PREFEITURA MUNICIPAL DE PEROBAL</h1>
+              <p class="text-sm text-gray-600 font-medium">SECRETARIA MUNICIPAL DE SAÚDE</p>
+              <p class="text-xs text-gray-500">CNPJ: 76.460.526/0001-16</p>
+              <p class="text-xs text-gray-500">Rua Jaracatiá, 1060 - CEP 87538-000 - Perobal - PR</p>
+              <p class="text-xs text-gray-500">Telefax: (44) 3625-1225</p>
             </div>
           </div>
-          <div className="text-sm text-right">
-            <p className="font-bold">Secretaria Municipal de Saúde</p>
+          <div class="text-right text-sm">
+            <p class="font-bold">RECEITA MÉDICA</p>
+            <p class="text-xs text-gray-600">Data: {formatDate(prescription.data)}</p>
           </div>
         </div>
         
-        <h2 className="text-xl font-bold mb-4 text-center">RECEITA MÉDICA</h2>
-        
-        <div className="mb-4 text-sm">
-          <div className="flex justify-between">
-            <span>
-              <strong>Paciente:</strong> {patient.nome}
-            </span>
-            <span>
-              <strong>Data de Nascimento:</strong> {formatDate(patient.dataNascimento)}
-            </span>
-          </div>
-          <div className="mt-1">
-            <strong>CPF/RG:</strong> {patient.cpf}
+        <div className="mb-4 text-sm border-t border-b border-gray-300 py-3">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p><strong>Paciente:</strong> {patient.nome}</p>
+              <p><strong>CPF/RG:</strong> {patient.cpf}</p>
+            </div>
+            <div>
+              <p><strong>Data de Nascimento:</strong> {formatDate(patient.dataNascimento)}</p>
+            </div>
           </div>
         </div>
       </div>
